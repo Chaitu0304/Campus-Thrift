@@ -14,14 +14,27 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || '*',
+    origin: function (origin, callback) {
+      if (!origin || origin.includes('vercel.app') || origin.includes('localhost') || origin.includes('railway.app')) {
+        callback(null, origin);
+      } else {
+        callback(new Error('Not allowed by CORS'), false);
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   },
 });
 
 // Middleware
 app.use(cors({
-  origin: [process.env.FRONTEND_URL || 'https://campus-thrift-ong.vercel.app', 'http://localhost:5173'],
+  origin: function (origin, callback) {
+    // Allow any Vercel domain, localhost, or requests with no origin (like mobile apps/curl)
+    if (!origin || origin.includes('vercel.app') || origin.includes('localhost') || origin.includes('railway.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
