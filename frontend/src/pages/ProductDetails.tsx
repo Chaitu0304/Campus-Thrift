@@ -2,9 +2,26 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { MessageSquare, Heart, Share2, MapPin, Loader2 } from 'lucide-react';
 
+interface Product {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  category: string;
+  condition: string;
+  department?: string;
+  images: string[];
+  campus: string;
+  sellerId: {
+    _id: string;
+    name: string;
+    campus: string;
+  };
+}
+
 export default function ProductDetails() {
   const { id } = useParams();
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

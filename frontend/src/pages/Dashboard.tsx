@@ -1,13 +1,28 @@
 import { useState, useEffect } from 'react';
-import { Package, Heart, ShoppingBag, Settings, LogOut, Plus, Loader2 } from 'lucide-react';
+import { Package, Heart, Settings, LogOut, Plus, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
+
+interface Product {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  category: string;
+  condition: string;
+  images: string[];
+  sellerId: {
+    _id: string;
+    name: string;
+    campus: string;
+  } | string;
+}
 
 export default function Dashboard() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('listings');
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // New product form state
@@ -27,23 +42,27 @@ export default function Dashboard() {
       return;
     }
 
+    const fetchMyProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`http://localhost:5000/api/products?sellerId=${user?._id}`);
+        const data = await response.json();
+        const myProducts = data.filter((p: Product) => {
+          if (p.sellerId && typeof p.sellerId === 'object' && '_id' in p.sellerId) {
+            return p.sellerId._id === user?._id;
+          }
+          return p.sellerId === user?._id;
+        });
+        setProducts(myProducts);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchMyProducts();
   }, [user, navigate]);
-
-  const fetchMyProducts = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products?sellerId=${user?._id}`);
-      const data = await response.json();
-      // Filter products strictly for the logged-in user in case the backend query param doesn't work perfectly
-      const myProducts = data.filter((p: any) => p.sellerId._id === user?._id || p.sellerId === user?._id);
-      setProducts(myProducts);
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -71,7 +90,10 @@ export default function Dashboard() {
       if (response.ok) {
         setShowAddForm(false);
         setFormData({ title: '', description: '', category: 'Books', condition: 'Good', price: '', department: '' });
-        fetchMyProducts();
+        setShowAddForm(false);
+        setFormData({ title: '', description: '', category: 'Books', condition: 'Good', price: '', department: '' });
+        // Since fetchMyProducts is in useEffect now, we can either trigger a re-fetch or just reload
+        window.location.reload();
       } else {
         const error = await response.json();
         alert(error.message);
