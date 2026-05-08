@@ -37,7 +37,7 @@ router.post('/register', async (req, res) => {
         name: user.name,
         email: user.email,
         campus: user.campus,
-        token: generateToken(user._id as string),
+        token: generateToken(user._id.toString()),
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -60,7 +60,7 @@ router.post('/login', async (req, res) => {
         name: user.name,
         email: user.email,
         campus: user.campus,
-        token: generateToken(user._id as string),
+        token: generateToken(user._id.toString()),
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });

@@ -33,7 +33,7 @@ export default function Home() {
                   Start Shopping
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
-                <Link to="/register" className="inline-flex justify-center items-center px-8 py-4 border border-border text-lg font-medium rounded-xl text-foreground bg-white hover:bg-gray-50 transition-all hover:-translate-y-1 shadow-sm">
+                <Link to="/dashboard" className="inline-flex justify-center items-center px-8 py-4 border border-border text-lg font-medium rounded-xl text-foreground bg-white hover:bg-gray-50 transition-all hover:-translate-y-1 shadow-sm">
                   Sell an Item
                 </Link>
               </div>

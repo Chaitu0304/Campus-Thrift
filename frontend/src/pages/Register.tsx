@@ -1,7 +1,53 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, School, ArrowRight } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
 
 export default function Register() {
+  const navigate = useNavigate();
+  const { login } = useAuthStore();
+  const [formData, setFormData] = useState({
+    name: '',
+    campus: '',
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      login(data);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-border">
@@ -16,7 +62,14 @@ export default function Register() {
             Join your campus marketplace today
           </p>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+        
+        {error && (
+          <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm text-center">
+            {error}
+          </div>
+        )}
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="sr-only">Full Name</label>
@@ -29,6 +82,8 @@ export default function Register() {
                   name="name"
                   type="text"
                   required
+                  value={formData.name}
+                  onChange={handleChange}
                   className="appearance-none relative block w-full px-3 py-3 pl-10 border border-border placeholder-muted-foreground text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all"
                   placeholder="Full Name"
                 />
@@ -44,12 +99,14 @@ export default function Register() {
                   id="campus"
                   name="campus"
                   required
+                  value={formData.campus}
+                  onChange={handleChange}
                   className="appearance-none relative block w-full px-3 py-3 pl-10 border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all bg-white"
                 >
-                  <option value="" disabled selected>Select your campus</option>
-                  <option value="stanford">Stanford University</option>
-                  <option value="mit">MIT</option>
-                  <option value="harvard">Harvard University</option>
+                  <option value="" disabled>Select your campus</option>
+                  <option value="Stanford University">Stanford University</option>
+                  <option value="MIT">MIT</option>
+                  <option value="Harvard University">Harvard University</option>
                 </select>
               </div>
             </div>
@@ -65,6 +122,8 @@ export default function Register() {
                   type="email"
                   autoComplete="email"
                   required
+                  value={formData.email}
+                  onChange={handleChange}
                   className="appearance-none relative block w-full px-3 py-3 pl-10 border border-border placeholder-muted-foreground text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all"
                   placeholder="College Email (.edu preferred)"
                 />
@@ -82,6 +141,8 @@ export default function Register() {
                   type="password"
                   autoComplete="new-password"
                   required
+                  value={formData.password}
+                  onChange={handleChange}
                   className="appearance-none relative block w-full px-3 py-3 pl-10 border border-border placeholder-muted-foreground text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all"
                   placeholder="Password"
                 />
@@ -92,10 +153,11 @@ export default function Register() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-lg shadow-primary-500/30 transition-all hover:-translate-y-0.5"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-lg shadow-primary-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Create Account
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {!isLoading && <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />}
             </button>
           </div>
         </form>
