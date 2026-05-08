@@ -45,7 +45,8 @@ export default function Dashboard() {
     const fetchMyProducts = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:5000/api/products?sellerId=${user?._id}`);
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${API_URL}/api/products?sellerId=${user?._id}`);
         const data = await response.json();
         const myProducts = data.filter((p: Product) => {
           if (p.sellerId && typeof p.sellerId === 'object' && '_id' in p.sellerId) {
@@ -74,7 +75,8 @@ export default function Dashboard() {
     if (!user) return;
 
     try {
-      const response = await fetch('http://localhost:5000/api/products', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${API_URL}/api/products`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

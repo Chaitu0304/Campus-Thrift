@@ -19,7 +19,8 @@ export default function Marketplace() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const url = new URL('http://localhost:5000/api/products');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const url = new URL(`${API_URL}/api/products`);
         if (searchTerm) url.searchParams.append('search', searchTerm);
         
         const response = await fetch(url.toString());
