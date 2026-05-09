@@ -87,3 +87,11 @@ const PORT = process.env.PORT || 5000;
 httpServer.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception thrown:', error);
+});
